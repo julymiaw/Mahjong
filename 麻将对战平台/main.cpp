@@ -19,12 +19,15 @@ Player gameTurn(std::vector<Player> players, Mahjong mahjong,int gameTurns = 0, 
         for (int i = 1; i <= 3; i++) {
             int checkIndex = gameIndex + i;
             if (checkIndex > 3)checkIndex -= 4;
-            if (players[checkIndex].pungCheck(discardedTile)) {
-                std::cout << "是否杠牌";
-                bool n;
-                std::cin >> n;
+            if (players[checkIndex].kongCheck(discardedTile)) {
+                int n;
+                do {
+                    std::cout << "请选择是否杠牌：" << std::endl;
+                    players[checkIndex].displayHand();
+                    std::cin >> n;
+                } while (n < 0 || n > 1);//如果输入选项非法则重新输入
                 if (n) {
-                    discardedTile = players[checkIndex].pung(discardedTile,mahjong);//杠牌同样涉及摸牌，需要判定牌库是否为空，如果为空则进入流局
+                    discardedTile = players[checkIndex].kong(discardedTile,mahjong, players[gameIndex]);//杠牌同样涉及摸牌，需要判定牌库是否为空，如果为空则进入流局
                     if (players[checkIndex].isHuPlayer()) {
                         std::cout << "共用" << gameTurns << "轮分出胜负" << std::endl;
                         return players[checkIndex];//如果玩家胡牌（杠胡），游戏结束，返回获胜玩家姓名
@@ -34,15 +37,18 @@ Player gameTurn(std::vector<Player> players, Mahjong mahjong,int gameTurns = 0, 
                     return gameTurn(players, mahjong, gameTurns + 1, checkIndex + 1, discardedTile);//如果杠牌且没胡，轮数+1，从当前玩家的下家开始新的一轮
                 }
             }
-            if (players[checkIndex].kongCheck(discardedTile)) {
-                std::cout << "是否碰牌";
-                bool n;
-                std::cin >> n;
+            if (players[checkIndex].pungCheck(discardedTile)) {
+                int n;
+                do {
+                    std::cout << "请选择是否碰牌：" << std::endl;
+                    players[checkIndex].displayHand();
+                    std::cin >> n;
+                } while (n < 0 || n > 1);//如果输入选项非法则重新输入
                 if (n) {
-                    discardedTile = players[checkIndex].kong(discardedTile);
+                    discardedTile = players[checkIndex].pung(discardedTile, players[gameIndex]);//需要传入当前玩家序号，以便删除其弃牌堆中对应牌
                     if (players[checkIndex].isHuPlayer()) {
                         std::cout << "共用" << gameTurns << "轮分出胜负" << std::endl;
-                        return players[checkIndex];//如果玩家胡牌（杠胡），游戏结束，返回获胜玩家姓名
+                        return players[checkIndex];//如果玩家胡牌（碰胡），游戏结束，返回获胜玩家姓名
                     }
                     return gameTurn(players, mahjong, gameTurns + 1, checkIndex+1, discardedTile);//如果碰牌且没胡，轮数+1，从当前玩家的下家开始新的一轮
                 }
@@ -71,7 +77,7 @@ int main() {
     for (auto& player : players) {
         player.sortHand();
     }
-    Player winner = gameTurn(players, mahjong);
+    Player winner = gameTurn(players, mahjong);//输入四个玩家和一副麻将即可开始游戏
     if (winner == Draw)std::cout << "流局，无人获胜";
     return 0;
 }
